@@ -2,8 +2,11 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
+	"github.com/joho/godotenv"
+	"github.com/staticfrost/td-go-rest-api/internal/database"
 	transportHTTP "github.com/staticfrost/td-go-rest-api/internal/transport/http"
 )
 
@@ -15,6 +18,12 @@ type App struct {
 // Run - this sets up the app
 func (app *App) Run() error {
 	fmt.Println("Setting up our App")
+
+	var err error
+	_, err = database.NewDatabase()
+	if err != nil {
+		return err
+	}
 
 	handler := transportHTTP.NewHandler()
 	handler.SetupRoutes()
@@ -33,5 +42,14 @@ func main() {
 	if err := app.Run(); err != nil {
 		fmt.Println("Error start up REST API")
 		fmt.Println(err)
+	}
+}
+
+func init() {
+
+	err := godotenv.Load()
+
+	if err != nil {
+		log.Fatal("Error loading .env file")
 	}
 }
