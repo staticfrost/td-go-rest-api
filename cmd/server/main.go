@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/joho/godotenv"
+	"github.com/staticfrost/td-go-rest-api/internal/comment"
 	"github.com/staticfrost/td-go-rest-api/internal/database"
 	transportHTTP "github.com/staticfrost/td-go-rest-api/internal/transport/http"
 )
@@ -20,12 +21,14 @@ func (app *App) Run() error {
 	fmt.Println("Setting up our App")
 
 	var err error
-	_, err = database.NewDatabase()
+	db, err = database.NewDatabase()
 	if err != nil {
 		return err
 	}
 
-	handler := transportHTTP.NewHandler()
+	CommentService := comment.NewService(db)
+
+	handler := transportHTTP.NewHandler(CommentService)
 	handler.SetupRoutes()
 
 	if err := http.ListenAndServe(":8080", handler.Router); err != nil {
@@ -45,6 +48,7 @@ func main() {
 	}
 }
 
+// Learnt about this from: https://zetcode.com/golang/env/
 func init() {
 
 	err := godotenv.Load()
